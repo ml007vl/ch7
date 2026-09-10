@@ -19,8 +19,8 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 # Copy file WAR vào Tomcat, đổi tên thành ROOT.war để chạy ở đường dẫn gốc
 COPY --from=builder /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 
-# Mở cổng 8080
+# Mở cổng 8080 (chỉ mang tính tài liệu)
 EXPOSE 8080
 
-# Chạy Tomcat
-CMD ["catalina.sh", "run"]
+# Chạy Tomcat với cổng động từ biến môi trường PORT của Render
+CMD ["sh", "-c", "sed -i 's/port=\"8080\"/port=\"'$PORT'\"/' /usr/local/tomcat/conf/server.xml && catalina.sh run"]
