@@ -1,26 +1,13 @@
-# ===== Stage 1: Build with Maven =====
-FROM maven:3.9.6-eclipse-temurin-17 AS builder
+# Sử dụng Tomcat 9 chạy trên Java 17
+FROM tomcat:9.0-jdk17-openjdk-slim
 
-WORKDIR /app
+# Xóa ứng dụng mặc định của Tomcat
+RUN rm -rf /usr/local/tomcat/webapps/ROOT
 
-# Copy pom.xml và source code
-COPY pom.xml .
-COPY src ./src
+# Copy file Bai2.war ngay ở thư mục gốc vào Tomcat
+COPY Bai2.war /usr/local/tomcat/webapps/ROOT.war
 
-# Build file WAR
-RUN mvn clean package -DskipTests
-
-# ===== Stage 2: Run on Tomcat 9 =====
-FROM tomcat:9.0-jdk17-temurin
-
-# Xóa webapps mặc định
-RUN rm -rf /usr/local/tomcat/webapps/*
-
-# Copy file WAR vào Tomcat, đổi tên thành ROOT.war để chạy ở đường dẫn gốc
-COPY --from=builder /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
-
-# Mở cổng 8080 (chỉ mang tính tài liệu)
+# Mở cổng 8080
 EXPOSE 8080
 
-# Chạy Tomcat với cổng động từ biến môi trường PORT của Render
-CMD ["sh", "-c", "sed -i 's/port=\"8080\"/port=\"'$PORT'\"/' /usr/local/tomcat/conf/server.xml && catalina.sh run"]
+CMD ["catalina.sh", "run"]
